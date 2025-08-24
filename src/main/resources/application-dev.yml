@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://:3307/cczkweb?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: CCZK@130788
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 88
+
+#mqtt:
+#  broker-url: tcp://localhost:1883
+#  client-id: spring-client
+#  username: test
+#  password: test
+#  topics:
+#    heartbeat: device/heartbeat
+#    order: device/order
+
+mqtt:
+  max-retries: 10
+  clients:
+    client1:
+      brokerUrl: tcp://localhost:1883
+      clientId: client1Id
+      username: test
+      password: test
+      topics:
+        - topic: /device/heartBreak
+          qos: 1
+        - topic: /test/rstyro
+          qos: 1
+        - topic: /room/502
+          qos: 1
+        - topic: test/topic
+          qos: 1
