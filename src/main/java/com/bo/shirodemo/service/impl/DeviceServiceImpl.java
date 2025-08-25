@@ -74,7 +74,7 @@ public class DeviceServiceImpl implements DeviceService {
             List<Predicate> predicates = new ArrayList<>();
             // 非管理员只能查看自己的机器
             if (!Constant.USER_TYPE_ADMIN.equals(user.getUserType())) {
-                predicates.add(criteriaBuilder.equal(root.get("userId"), user.userId));
+//                predicates.add(criteriaBuilder.equal(root.get("userId"), user.userId));
             }
             if (Ognl.isNotEmpty(vo.getDeviceNo())) {
                 predicates.add(criteriaBuilder.equal(root.get("deviceNo"), vo.getDeviceNo()));
@@ -87,7 +87,7 @@ public class DeviceServiceImpl implements DeviceService {
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
-        Pageable pageable = PageRequest.of(page, limit, Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.Direction.DESC, "deviceId");
         Page<Device> all = repository.findAll(specification, pageable);
         List<DeviceDto> deviceDtoList = new ArrayList<>();
         for (Device device : all.getContent()) {

@@ -1,7 +1,10 @@
 package com.bo.shirodemo.service;
 
+import com.bo.shirodemo.dto.DeviceTypeDto;
 import com.bo.shirodemo.entity.DeviceType;
 import com.bo.shirodemo.utils.Result;
+import com.bo.shirodemo.vo.DeviceTypeVo;
+import org.springframework.data.domain.Page;
 
 /**
  * @Description: 机器类型接口
@@ -14,11 +17,11 @@ public interface DeviceTypeService {
 
     Result<?> createDeviceType(String deviceTypeName, String remark);
 
-    Result<?> queryDeviceTypeList(Integer page, Integer limit, String deviceTypeName);
+    Page<DeviceTypeDto> queryDeviceTypeList(Integer page, Integer limit, String deviceTypeName);
 
     DeviceType findByDeviceId(Long deviceTypeId);
 
-    Result<?> updateDeviceType(Long deviceTypeId, String deviceTypeName, String remark);
+    Result<?> updateDeviceType(DeviceTypeVo vo);
 
     Result<?> deleteDeviceType(Long deviceTypeId);
 

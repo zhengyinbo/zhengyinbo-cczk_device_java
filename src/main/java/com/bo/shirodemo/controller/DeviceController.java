@@ -43,13 +43,18 @@ public class DeviceController {
         }
     }
 
-    @RequiresRoles(value = {"admin", "user"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin", "user"}, logical = Logical.OR)
     @RequestMapping("/list")
     public Result<?> queryDeviceList(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                    @RequestParam(value = "limit", defaultValue = "10") Integer limit,
                                    DeviceVo deviceVo) {
-        Page<DeviceDto> deviceDtos = deviceService.queryDeviceList(page, limit, deviceVo);
-        return ReturnResult.success(deviceDtos.getContent(), deviceDtos.getTotalElements());
+        try {
+            Page<DeviceDto> deviceDtos = deviceService.queryDeviceList(page, limit, deviceVo);
+            return ReturnResult.success(deviceDtos.getContent(), deviceDtos.getTotalElements());
+        } catch (Exception e) {
+            log.info("DeviceController-queryDeviceList error = ", e);
+            return ReturnResult.fail(500, e.getMessage());
+        }
     }
 
     @RequiresRoles(value = {"admin"}, logical = Logical.OR)

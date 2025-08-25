@@ -56,7 +56,7 @@ public class UserController {
 
 //    @RequiresRoles("admin")
     @RequestMapping("/list")
-    public Result<?> queryUserList(@RequestParam(value = "page", defaultValue = "0") Integer page,
+    public Result<?> queryUserList(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                    @RequestParam(value = "limit", defaultValue = "10") Integer limit,
                                    UserVo userVo) {
         Page<UserDto> userDtos = userService.queryUserList(page, limit, userVo);

@@ -1,16 +1,25 @@
 package com.bo.shirodemo.service.impl;
 
+import com.bo.shirodemo.dto.DeviceDto;
+import com.bo.shirodemo.dto.DeviceTypeDto;
 import com.bo.shirodemo.entity.Device;
 import com.bo.shirodemo.entity.DeviceType;
 import com.bo.shirodemo.repository.DeviceTypeRepository;
 import com.bo.shirodemo.service.DeviceService;
 import com.bo.shirodemo.service.DeviceTypeService;
+import com.bo.shirodemo.utils.Constant;
 import com.bo.shirodemo.utils.Ognl;
 import com.bo.shirodemo.utils.Result;
 import com.bo.shirodemo.utils.ReturnResult;
+import com.bo.shirodemo.vo.DeviceTypeVo;
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +57,23 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
     }
 
     @Override
-    public Result<?> queryDeviceTypeList(Integer page, Integer limit, String deviceTypeName) {
-        return null;
+    public Page<DeviceTypeDto> queryDeviceTypeList(Integer page, Integer limit, String deviceTypeName) {
+        Specification<DeviceType> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (Ognl.isNotEmpty(deviceTypeName)) {
+                predicates.add(criteriaBuilder.equal(root.get("deviceTypeName"), deviceTypeName));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.Direction.DESC, "deviceTypeId");
+        Page<DeviceType> all = repository.findAll(specification, pageable);
+        List<DeviceTypeDto> deviceTypeDtoList = new ArrayList<>();
+        for (DeviceType deviceType : all.getContent()) {
+            DeviceTypeDto dto = new DeviceTypeDto();
+            BeanUtils.copyProperties(deviceType, dto);
+            deviceTypeDtoList.add(dto);
+        }
+        return new PageImpl<>(deviceTypeDtoList, pageable, all.getTotalElements());
     }
 
     @Override
@@ -58,17 +82,17 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
     }
 
     @Override
-    public Result<?> updateDeviceType(Long deviceTypeId, String deviceTypeName, String remark) {
-        if (Ognl.isEmpty(deviceTypeName)) {
+    public Result<?> updateDeviceType(DeviceTypeVo vo) {
+        if (Ognl.isEmpty(vo.getDeviceTypeName())) {
             return ReturnResult.fail(400, "修改失败，请输入机器类型名称");
         }
-        Optional<DeviceType> byId = repository.findById(deviceTypeId);
+        Optional<DeviceType> byId = repository.findById(vo.getDeviceTypeId());
         if (byId.isEmpty()) {
             return ReturnResult.fail(400, "修改失败，请选择机器类型");
         }
         DeviceType type = byId.get();
-        type.setDeviceTypeName(deviceTypeName);
-        type.setRemark(remark);
+        type.setDeviceTypeName(vo.getDeviceTypeName());
+        type.setRemark(vo.getRemark());
         repository.save(type);
         return ReturnResult.success("修改成功");
     }
