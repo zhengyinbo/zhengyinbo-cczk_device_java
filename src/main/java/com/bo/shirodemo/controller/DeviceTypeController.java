@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @Description: 设备类型管理
  * @Author yb zheng
@@ -32,13 +34,13 @@ public class DeviceTypeController {
         this.deviceTypeService = deviceTypeService;
     }
 
-    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
     @RequestMapping("/create")
     public Result<?> createDeviceType(@RequestBody DeviceTypeVo deviceTypeVo) {
         try {
             return deviceTypeService.createDeviceType(deviceTypeVo.getDeviceTypeName(), deviceTypeVo.getRemark());
         } catch (Exception e) {
-            log.info("deviceTypeController-createdeviceType error = ", e);
+            log.info("deviceTypeController-createDeviceType error = ", e);
             return ReturnResult.fail(500, e.getMessage());
         }
     }
@@ -57,7 +59,7 @@ public class DeviceTypeController {
         }
     }
 
-    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
     @RequestMapping("/update")
     public Result<?> updateDeviceType(@RequestBody DeviceTypeVo deviceTypeVo) {
         try {
@@ -68,7 +70,7 @@ public class DeviceTypeController {
         }
     }
 
-    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
     @RequestMapping("/delete")
     public Result<?> deleteDeviceType(@RequestBody DeviceTypeVo deviceTypeVo) {
         try {
@@ -78,4 +80,16 @@ public class DeviceTypeController {
             return ReturnResult.fail(500, e.getMessage());
         }
     }
+
+    @RequestMapping("/findAll")
+    public Result<?> findAll() {
+        try {
+            List<DeviceTypeDto> deviceTypeDtos = deviceTypeService.findAll();
+            return ReturnResult.success(deviceTypeDtos);
+        } catch (Exception e) {
+            log.info("deviceTypeController-queryDeviceTypeList error = ", e);
+            return ReturnResult.fail(500, e.getMessage());
+        }
+    }
+
 }

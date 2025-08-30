@@ -37,7 +37,7 @@ public class OrdersController {
         this.ordersService = ordersService;
     }
 
-    @RequiresRoles(value = {"admin", "user"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin", "user"}, logical = Logical.OR)
     @RequestMapping("/list")
     public Result<?> queryOrdersList(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                      @RequestParam(value = "limit", defaultValue = "10") Integer limit,

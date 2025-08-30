@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @Description: 用户控制类
  * @Author yb zheng
@@ -43,13 +45,23 @@ public class UserController {
         }
     }
 
-    @RequiresRoles("admin")
+//    @RequiresRoles("admin")
     @RequestMapping("/update")
     public Result<?> updateUser(@RequestBody User user) {
         try {
             return userService.updateUser(user);
         } catch (Exception e) {
             log.info("UserController-updateUser error = ", e);
+            return ReturnResult.fail(500, e.getMessage());
+        }
+    }
+
+    @RequestMapping("/band")
+    public Result<?> bandUser(@RequestBody User user) {
+        try {
+            return userService.bandUser(user);
+        } catch (Exception e) {
+            log.info("UserController-bandUser error = ", e);
             return ReturnResult.fail(500, e.getMessage());
         }
     }
@@ -61,6 +73,12 @@ public class UserController {
                                    UserVo userVo) {
         Page<UserDto> userDtos = userService.queryUserList(page, limit, userVo);
         return ReturnResult.success(userDtos.getContent(), userDtos.getTotalElements());
+    }
+
+    @RequestMapping("/findAll")
+    public Result<?> findAll() {
+        List<UserDto> users = userService.findAll();
+        return ReturnResult.success(users);
     }
 
 }

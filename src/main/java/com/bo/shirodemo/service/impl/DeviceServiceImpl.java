@@ -1,13 +1,17 @@
 package com.bo.shirodemo.service.impl;
 
 import com.bo.shirodemo.dto.DeviceDto;
+import com.bo.shirodemo.dto.DeviceTypeDto;
+import com.bo.shirodemo.dto.UserDto;
 import com.bo.shirodemo.entity.Device;
+import com.bo.shirodemo.entity.DeviceType;
 import com.bo.shirodemo.entity.User;
 import com.bo.shirodemo.mqtt2.MqttClientManager;
 import com.bo.shirodemo.mqtt2.MqttClientProperties;
 import com.bo.shirodemo.mqtt2.MqttConstant;
 import com.bo.shirodemo.repository.DeviceRepository;
 import com.bo.shirodemo.service.DeviceService;
+import com.bo.shirodemo.service.DeviceTypeService;
 import com.bo.shirodemo.service.UserService;
 import com.bo.shirodemo.utils.Constant;
 import com.bo.shirodemo.utils.Ognl;
@@ -21,9 +25,9 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.security.Security;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 机器接口实现类
@@ -38,10 +42,12 @@ public class DeviceServiceImpl implements DeviceService {
 
     private final DeviceRepository repository;
     private final UserService userService;
+    private final DeviceTypeService deviceTypeService;
 
-    public DeviceServiceImpl(DeviceRepository repository, UserService userService) {
+    public DeviceServiceImpl(DeviceRepository repository, UserService userService, DeviceTypeService deviceTypeService) {
         this.repository = repository;
         this.userService = userService;
+        this.deviceTypeService = deviceTypeService;
     }
 
     @Override
@@ -58,6 +64,8 @@ public class DeviceServiceImpl implements DeviceService {
         device.setMacAdd(vo.getMacAdd());
         device.setRemark(vo.getRemark());
         device.setIsDelete("0");
+        device.setCreateTime(new Date());
+        device.setUpdateTime(new Date());
         repository.save(device);
         return ReturnResult.success("添加成功");
     }
@@ -72,9 +80,10 @@ public class DeviceServiceImpl implements DeviceService {
         User user = userService.getUserInfo();
         Specification<Device> specification = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("isDelete"), "0"));
             // 非管理员只能查看自己的机器
             if (!Constant.USER_TYPE_ADMIN.equals(user.getUserType())) {
-//                predicates.add(criteriaBuilder.equal(root.get("userId"), user.userId));
+                predicates.add(criteriaBuilder.equal(root.get("userId"), user.getUserId()));
             }
             if (Ognl.isNotEmpty(vo.getDeviceNo())) {
                 predicates.add(criteriaBuilder.equal(root.get("deviceNo"), vo.getDeviceNo()));
@@ -89,10 +98,16 @@ public class DeviceServiceImpl implements DeviceService {
         };
         Pageable pageable = PageRequest.of(page-1, limit, Sort.Direction.DESC, "deviceId");
         Page<Device> all = repository.findAll(specification, pageable);
+        Map<Long, String> typeMap =
+                deviceTypeService.findAll().stream().collect(Collectors.toMap(DeviceTypeDto::getDeviceTypeId, DeviceTypeDto::getDeviceTypeName));
+        Map<Long, String> userMap =
+                userService.findAll().stream().collect(Collectors.toMap(UserDto::getUserId, UserDto::getUserName));
         List<DeviceDto> deviceDtoList = new ArrayList<>();
         for (Device device : all.getContent()) {
             DeviceDto dto = new DeviceDto();
             BeanUtils.copyProperties(device, dto);
+            dto.setUserName(userMap.get(device.getUserId()));
+            dto.setDeviceTypeName(typeMap.get(device.getDeviceTypeId()));
             deviceDtoList.add(dto);
         }
         return new PageImpl<>(deviceDtoList, pageable, all.getTotalElements());

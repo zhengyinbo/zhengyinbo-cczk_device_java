@@ -20,6 +20,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author bo
@@ -73,7 +74,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserInfo() {
-        return this.findByUserName(SecurityUtils.getSubject().getPrincipals().toString());
+        Object principal = SecurityUtils.getSubject().getPrincipal();
+        if (Ognl.isNotEmpty(principal)) {
+            return this.findByUserName(principal.toString());
+        }
+        return null;
     }
 
     @Transient
@@ -103,7 +108,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result<?> updateUser(User user) {
-        User u = findByUserName(user.getUserName());
+        User u = findByUserId(user.getUserId());
+        User byUserName = findByUserName(user.getUserName());
+        if (Ognl.isNotEmpty(byUserName)) {
+            return ReturnResult.fail(400, "用户名已存在");
+        }
         if (Ognl.isNotEmpty(user.getPassword())) {
             u.setPassword(Md5Util.pwdEncr(user.getPassword()));
         }
@@ -119,6 +128,30 @@ public class UserServiceImpl implements UserService {
         }
         repository.save(u);
         return ReturnResult.success("修改成功");
+    }
+
+    @Override
+    public Result<?> bandUser(User user) {
+        User u = findByUserId(user.getUserId());
+        if (u.getStatus().equals("1")) {
+            u.setStatus("2");
+        } else {
+            u.setStatus("1");
+        }
+        repository.save(u);
+        return ReturnResult.success("修改成功");
+    }
+
+    @Override
+    public List<UserDto> findAll() {
+        List<User> all = repository.findAll();
+        List<UserDto> userDtoList = new ArrayList<>();
+        for (User user : all) {
+            UserDto dto = new UserDto();
+            BeanUtils.copyProperties(user, dto);
+            userDtoList.add(dto);
+        }
+        return userDtoList;
     }
 
 }

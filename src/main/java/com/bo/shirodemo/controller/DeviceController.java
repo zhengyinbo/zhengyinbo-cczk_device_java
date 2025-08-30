@@ -32,7 +32,7 @@ public class DeviceController {
         this.deviceService = deviceService;
     }
 
-    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
     @RequestMapping("/create")
     public Result<?> createDevice(@RequestBody DeviceVo deviceVo) {
         try {
@@ -57,7 +57,7 @@ public class DeviceController {
         }
     }
 
-    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
     @RequestMapping("/update")
     public Result<?> updateDevice(@RequestBody DeviceVo deviceVo) {
         try {
@@ -68,7 +68,7 @@ public class DeviceController {
         }
     }
 
-    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+//    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
     @RequestMapping("/delete")
     public Result<?> deleteDevice(@RequestBody DeviceVo deviceVo) {
         try {

@@ -20,7 +20,7 @@ public class DeviceDto {
 
     private String userName;
 
-    private String deviceTypeId;
+    private Long deviceTypeId;
 
     private String deviceTypeName;
 

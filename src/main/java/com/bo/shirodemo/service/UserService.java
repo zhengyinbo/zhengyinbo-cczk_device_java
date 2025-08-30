@@ -6,6 +6,8 @@ import com.bo.shirodemo.utils.Result;
 import com.bo.shirodemo.vo.UserVo;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 /**
  * @Author bo
  * @DATE 2019/12/23
@@ -25,5 +27,9 @@ public interface UserService {
     Result<?> saveUser(User user);
 
     Result<?> updateUser(User user);
+
+    Result<?> bandUser(User user);
+
+    List<UserDto> findAll();
 
 }

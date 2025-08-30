@@ -11,5 +11,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface DeviceTypeRepository extends JpaRepository<DeviceType, Long>, JpaSpecificationExecutor<DeviceType> {
 
+    DeviceType findByDeviceTypeName(String deviceTypeName);
 
 }

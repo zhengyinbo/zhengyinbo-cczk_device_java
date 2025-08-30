@@ -1,13 +1,11 @@
 package com.bo.shirodemo.service.impl;
 
-import com.bo.shirodemo.dto.DeviceDto;
 import com.bo.shirodemo.dto.DeviceTypeDto;
 import com.bo.shirodemo.entity.Device;
 import com.bo.shirodemo.entity.DeviceType;
 import com.bo.shirodemo.repository.DeviceTypeRepository;
 import com.bo.shirodemo.service.DeviceService;
 import com.bo.shirodemo.service.DeviceTypeService;
-import com.bo.shirodemo.utils.Constant;
 import com.bo.shirodemo.utils.Ognl;
 import com.bo.shirodemo.utils.Result;
 import com.bo.shirodemo.utils.ReturnResult;
@@ -15,12 +13,12 @@ import com.bo.shirodemo.vo.DeviceTypeVo;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +36,7 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
     private final DeviceTypeRepository repository;
     private final DeviceService deviceService;
 
-    public DeviceTypeServiceImpl(DeviceTypeRepository repository, DeviceService deviceService) {
+    public DeviceTypeServiceImpl(DeviceTypeRepository repository, @Lazy DeviceService deviceService) {
         this.repository = repository;
         this.deviceService = deviceService;
     }
@@ -46,7 +44,11 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
     @Override
     public Result<?> createDeviceType(String deviceTypeName, String remark) {
         if (Ognl.isEmpty(deviceTypeName)) {
-            return ReturnResult.fail(400, "添加失败，请输入机器类型名称");
+            return ReturnResult.fail(400, "添加失败，请输入设备类型名称");
+        }
+        DeviceType deviceType = repository.findByDeviceTypeName(deviceTypeName);
+        if (Ognl.isNotEmpty(deviceType)) {
+            return ReturnResult.fail(400, "添加失败，设备类型已存在");
         }
         DeviceType type = new DeviceType();
         type.setDeviceTypeName(deviceTypeName);
@@ -60,6 +62,7 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
     public Page<DeviceTypeDto> queryDeviceTypeList(Integer page, Integer limit, String deviceTypeName) {
         Specification<DeviceType> specification = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("isDelete"), "0"));
             if (Ognl.isNotEmpty(deviceTypeName)) {
                 predicates.add(criteriaBuilder.equal(root.get("deviceTypeName"), deviceTypeName));
             }
@@ -90,6 +93,10 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
         if (byId.isEmpty()) {
             return ReturnResult.fail(400, "修改失败，请选择机器类型");
         }
+        DeviceType deviceType = repository.findByDeviceTypeName(vo.getDeviceTypeName());
+        if (Ognl.isNotEmpty(deviceType)) {
+            return ReturnResult.fail(400, "修改失败，设备类型已存在");
+        }
         DeviceType type = byId.get();
         type.setDeviceTypeName(vo.getDeviceTypeName());
         type.setRemark(vo.getRemark());
@@ -111,5 +118,17 @@ public class DeviceTypeServiceImpl implements DeviceTypeService {
         type.setIsDelete("1");
         repository.save(type);
         return ReturnResult.success("删除成功");
+    }
+
+    @Override
+    public List<DeviceTypeDto> findAll() {
+        List<DeviceType> all = repository.findAll().stream().filter(e->e.getIsDelete().equals("0")).toList();
+        List<DeviceTypeDto> deviceTypeDtoList = new ArrayList<>();
+        for (DeviceType deviceType : all) {
+            DeviceTypeDto dto = new DeviceTypeDto();
+            BeanUtils.copyProperties(deviceType, dto);
+            deviceTypeDtoList.add(dto);
+        }
+        return deviceTypeDtoList;
     }
 }

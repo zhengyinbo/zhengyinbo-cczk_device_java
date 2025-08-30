@@ -34,7 +34,8 @@ public class LoginController {
     @PostMapping(value = "login")
     public Object Login(@RequestBody UserVo userVo){
         Subject subject = SecurityUtils.getSubject(); //主体提交认证
-        SecurityUtils.getSubject().getSession().setTimeout(6 * 60 * 60 * 1000); //设置session失效时间：-1000l表示无限时长，默认为1800000表示30分钟 30*60*1000
+//        SecurityUtils.getSubject().getSession().setTimeout(6 * 60 * 60 * 1000); //设置session失效时间：-1000l表示无限时长，默认为1800000表示30分钟 30*60*1000
+        SecurityUtils.getSubject().getSession().setTimeout(-1L); //设置session失效时间：-1000l表示无限时长，默认为1800000表示30分钟 30*60*1000
         UsernamePasswordToken token;
 
         User user = userService.findByUserName(userVo.getUserName());

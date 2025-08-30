@@ -6,6 +6,8 @@ import com.bo.shirodemo.utils.Result;
 import com.bo.shirodemo.vo.DeviceTypeVo;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 /**
  * @Description: 机器类型接口
  * @Author yb zheng
@@ -24,5 +26,7 @@ public interface DeviceTypeService {
     Result<?> updateDeviceType(DeviceTypeVo vo);
 
     Result<?> deleteDeviceType(Long deviceTypeId);
+
+    List<DeviceTypeDto> findAll();
 
 }
