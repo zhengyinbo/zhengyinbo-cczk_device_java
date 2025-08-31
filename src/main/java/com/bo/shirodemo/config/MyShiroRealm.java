@@ -17,6 +17,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 
 import jakarta.annotation.Resource;
+
 import java.util.List;
 
 /**
@@ -46,14 +47,14 @@ public class MyShiroRealm extends AuthorizingRealm {
         String username = (String) principals.getPrimaryPrincipal();
         Long userId = userService.findByUserName(username).getUserId();
         List<UserRole> roles = userRoleService.findByUserId(userId);
-        for (int i=0;i< roles.size();i++){
+        for (int i = 0; i < roles.size(); i++) {
             String roleName = roleService.findByRoleId(roles.get(i).getRoleId()).getRoleName();
 //            String rolePremission = roleRepository.findByRid(roles.get(i).getRid()).getPermissions();
             // 添加角色
             authorizationInfo.addRole(roleName);
             //添加权限
             List<RolePermission> rolePermissions = rolePermissionService.findByRoleId(roles.get(i).getRoleId());
-            for (int j=0;j<rolePermissions.size();j++){
+            for (int j = 0; j < rolePermissions.size(); j++) {
                 String permissionName = permissionService.findByPermissionId(rolePermissions.get(j).getPermissionId()).getPermissionName();
                 authorizationInfo.addStringPermission(permissionName);
             }
@@ -65,6 +66,7 @@ public class MyShiroRealm extends AuthorizingRealm {
 
     /**
      * 认证
+     *
      * @param auth
      * @return
      * @throws AuthenticationException 主体传过来的认证信息
@@ -72,14 +74,14 @@ public class MyShiroRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth)
             throws AuthenticationException {
-        log.info("[身份认证 MyShiroRealm.doGetAuthenticationInfo()]，账号 = {}",(String)auth.getPrincipal());
+        log.info("[身份认证 MyShiroRealm.doGetAuthenticationInfo()]，账号 = {}", (String) auth.getPrincipal());
         //从主体传过来的认证信息中获取用户名
         //String username = (String)token.getPrincipal();
         //通过username从数据库中查找 User对象，如果找到
         //实际项目中，这里可以根据实际情况做缓存，如果不做，Shiro自己也是有时间间隔机制，2分钟内不会重复执行该方法
         String username = (String) auth.getPrincipal();
         User user = userService.findByUserName(username);
-        if(username == null){
+        if (username == null) {
             return null;
         }
         SimpleAuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo( //返回对象

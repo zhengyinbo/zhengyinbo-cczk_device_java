@@ -1,6 +1,7 @@
 package com.bo.shirodemo.config;
 
 import com.bo.shirodemo.utils.Ognl;
+import jakarta.servlet.Filter;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
@@ -10,6 +11,7 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.apache.shiro.web.util.WebUtils;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -20,6 +22,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -42,14 +45,20 @@ public class ShiroConfig {
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
         // 配置不会被拦截的链接 顺序判断
 
-        filterChainDefinitionMap.put("/**/**", "anon");
-        filterChainDefinitionMap.put("/**/**/**", "anon");
+        // 🔹 替换默认 authc 过滤器
+        Map<String, Filter> filters = new HashMap<>();
+        filters.put("authc", new RestAuthcFilter());
+        shiroFilterFactoryBean.setFilters(filters);
+
+//        filterChainDefinitionMap.put("/**/**", "anon");
+//        filterChainDefinitionMap.put("/**/**/**", "anon");
 
         filterChainDefinitionMap.put("/static/**", "anon");
         filterChainDefinitionMap.put("/static/**/**", "anon");
 
         filterChainDefinitionMap.put("/logout", "anon");
         filterChainDefinitionMap.put("/login", "anon");
+        filterChainDefinitionMap.put("/unauth", "anon");
         filterChainDefinitionMap.put("/mqtt/test/**", "anon");
 
         //配置退出 过滤器,其中的具体的退出代码Shiro已经替我们实现了
@@ -58,7 +67,7 @@ public class ShiroConfig {
         //<!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
         filterChainDefinitionMap.put("/**", "authc");
         // 如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
-        shiroFilterFactoryBean.setLoginUrl("/unauth");
+//        shiroFilterFactoryBean.setLoginUrl("/unauth");
         // 登录成功后要跳转的链接
 //        shiroFilterFactoryBean.setSuccessUrl("/index");
 
@@ -136,6 +145,13 @@ public class ShiroConfig {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
         return authorizationAttributeSourceAdvisor;
+    }
+
+    @Bean
+    public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
+        DefaultAdvisorAutoProxyCreator creator = new DefaultAdvisorAutoProxyCreator();
+        creator.setProxyTargetClass(true); // 使用 CGLIB 代理
+        return creator;
     }
 
     @Bean(name = "simpleMappingExceptionResolver")

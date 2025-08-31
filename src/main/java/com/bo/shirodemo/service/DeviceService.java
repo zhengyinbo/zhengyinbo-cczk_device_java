@@ -29,6 +29,11 @@ public interface DeviceService {
 
     Result<?> deleteDevice(DeviceVo vo);
 
+    Result<?> bandDevice(DeviceVo vo);
+
+    Result<?> unBandDevice(DeviceVo vo);
+
     Device findByDeviceNo(String deviceNo);
+
 
 }

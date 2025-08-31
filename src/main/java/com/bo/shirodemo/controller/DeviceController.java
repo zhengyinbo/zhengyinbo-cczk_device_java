@@ -78,4 +78,26 @@ public class DeviceController {
             return ReturnResult.fail(500, e.getMessage());
         }
     }
+
+    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+    @RequestMapping("/band")
+    public Result<?> bandDevice(@RequestBody DeviceVo deviceVo) {
+        try {
+            return deviceService.bandDevice(deviceVo);
+        } catch (Exception e) {
+            log.info("DeviceController-bandUser error = ", e);
+            return ReturnResult.fail(500, e.getMessage());
+        }
+    }
+
+    @RequiresRoles(value = {"admin"}, logical = Logical.OR)
+    @RequestMapping("/unBand")
+    public Result<?> unBandDevice(@RequestBody DeviceVo deviceVo) {
+        try {
+            return deviceService.unBandDevice(deviceVo);
+        } catch (Exception e) {
+            log.info("DeviceController-unBandDevice error = ", e);
+            return ReturnResult.fail(500, e.getMessage());
+        }
+    }
 }

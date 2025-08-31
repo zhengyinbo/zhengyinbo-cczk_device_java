@@ -20,6 +20,7 @@ import com.bo.shirodemo.utils.ReturnResult;
 import com.bo.shirodemo.vo.DeviceVo;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.constraintvalidators.bv.number.bound.decimal.DecimalMaxValidatorForBigDecimal;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -144,6 +145,33 @@ public class DeviceServiceImpl implements DeviceService {
         device.setIsDelete("1");
         repository.save(device);
         return ReturnResult.success("删除成功");
+    }
+
+    @Override
+    public Result<?> bandDevice(DeviceVo vo) {
+        Optional<Device> byId = repository.findById(vo.getDeviceId());
+        if (byId.isEmpty()) {
+            return ReturnResult.fail(400, "绑定失败，请选择机器");
+        }
+        Device device = byId.get();
+        if (Ognl.isNotEmpty(device.getUserId()) && !device.getUserId().equals(1L)) {
+            return ReturnResult.fail(400, "绑定失败，改机器已绑定其他用户");
+        }
+        device.setUserId(vo.getUserId());
+        repository.save(device);
+        return ReturnResult.success("绑定成功");
+    }
+
+    @Override
+    public Result<?> unBandDevice(DeviceVo vo) {
+        Optional<Device> byId = repository.findById(vo.getDeviceId());
+        if (byId.isEmpty()) {
+            return ReturnResult.fail(400, "解绑失败，请选择机器");
+        }
+        Device device = byId.get();
+        device.setUserId(1L);
+        repository.save(device);
+        return ReturnResult.success("解绑成功");
     }
 
     @Override

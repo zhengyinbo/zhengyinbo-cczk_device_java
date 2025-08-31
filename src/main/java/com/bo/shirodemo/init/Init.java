@@ -7,9 +7,12 @@ import com.bo.shirodemo.repository.*;
 import com.bo.shirodemo.utils.Constant;
 import com.bo.shirodemo.utils.Md5Util;
 import com.bo.shirodemo.utils.Ognl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.ShiroException;
 import org.apache.shiro.util.Initializable;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
@@ -20,7 +23,9 @@ import java.util.Date;
  * @Version 1.0
  */
 
-public class Init implements Initializable {
+@Slf4j
+@Component
+public class Init implements InitializingBean {
 
     @Autowired
     private UserRepository userRepository;
@@ -34,14 +39,16 @@ public class Init implements Initializable {
     private RolePermissionRepository rolePermissionRepository;
 
     @Override
-    public void init() throws ShiroException {
+    public void afterPropertiesSet() throws ShiroException {
+        log.info("【项目初始化】");
         User admin = userRepository.findByUserName("admin");
         if (Ognl.isEmpty(admin)) {
             // 创建管理员账户
             admin = new User();
             admin.setUserId(1L);
             admin.setUserName("admin");
-            admin.setPassword(Md5Util.pwdEncr("130788CCZK"));
+            admin.setPassword(Md5Util.pwdEncr("admin"));
+//            admin.setPassword(Md5Util.pwdEncr("130788CCZK"));
             admin.setStatus("正常");
             admin.setUserType(Constant.USER_TYPE_ADMIN);
             admin.setCreateTime(new Date());
@@ -56,7 +63,7 @@ public class Init implements Initializable {
             roleRepository.save(role);
 
             Role role2 = new Role();
-            role2.setRoleId(1L);
+            role2.setRoleId(2L);
             role2.setRoleName("user");
             roleRepository.save(role2);
 

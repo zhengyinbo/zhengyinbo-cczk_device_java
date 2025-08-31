@@ -16,7 +16,7 @@ public class DeviceDto {
 
     public Long deviceId;
 
-    private String userId;
+    private Long userId;
 
     private String userName;
 

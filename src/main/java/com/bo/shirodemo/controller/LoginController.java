@@ -11,12 +11,11 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 登录
+ *
  * @Author bo
  * @DATE 2019/12/23
  **/
@@ -32,7 +31,7 @@ public class LoginController {
     }
 
     @PostMapping(value = "login")
-    public Object Login(@RequestBody UserVo userVo){
+    public Object Login(@RequestBody UserVo userVo) {
         Subject subject = SecurityUtils.getSubject(); //主体提交认证
 //        SecurityUtils.getSubject().getSession().setTimeout(6 * 60 * 60 * 1000); //设置session失效时间：-1000l表示无限时长，默认为1800000表示30分钟 30*60*1000
         SecurityUtils.getSubject().getSession().setTimeout(-1L); //设置session失效时间：-1000l表示无限时长，默认为1800000表示30分钟 30*60*1000
@@ -47,14 +46,37 @@ public class LoginController {
             subject.login(token);
             return LoginResult.success(subject.getSession().getId());//返回登录状态
         } catch (IncorrectCredentialsException e) {
-            return LoginResult.fail(401,"密码错误");
+            return LoginResult.fail(401, "密码错误");
         } catch (LockedAccountException e) {
-            return LoginResult.fail(401,"登录失败，该用户已被冻结，请联系管理员");
+            return LoginResult.fail(401, "登录失败，该用户已被冻结，请联系管理员");
         } catch (AuthenticationException e) {
-            return LoginResult.fail(401,"该用户不存在");
+            return LoginResult.fail(401, "该用户不存在");
         } catch (Exception e) {
             log.error(e.getMessage());
             return null;
+        }
+    }
+
+    //未登录
+    @GetMapping(value = "/unauth")
+    public Object unauth() {
+        return LoginResult.failLogin(1001, "未登录");
+    }
+
+    //退出登录
+    @RequestMapping(value = "/logout")
+    public Object logout() {
+        log.info("退出登录");
+        Subject subject = SecurityUtils.getSubject();
+        try {
+            /**
+             * 退出登录后，删除用户在线状态，需要带token
+             */
+            subject.logout();
+            return LoginResult.successLogout();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return LoginResult.failLogin(401, "10007");
         }
     }
 
