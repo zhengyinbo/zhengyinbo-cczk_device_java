@@ -27,7 +27,7 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String no;
+    private String orderNo;
 
     @NotBlank(message = "用户id不能为空")
     private Long userId;

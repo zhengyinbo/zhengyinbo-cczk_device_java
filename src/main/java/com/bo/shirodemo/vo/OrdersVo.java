@@ -17,7 +17,7 @@ public class OrdersVo {
 
     private Long id;
 
-    private String no;
+    private String orderNo;
 
     private Long userId;
 

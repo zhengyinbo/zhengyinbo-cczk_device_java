@@ -61,7 +61,7 @@ public class OrdersServiceImpl implements OrdersService {
         User user = userService.findByUserId(device.getUserId());
 
         Orders orders = new Orders();
-        orders.setNo(UUIDUtils.getUUID() + System.currentTimeMillis());
+        orders.setOrderNo(UUIDUtils.getUUID() + System.currentTimeMillis());
         orders.setDeviceId(device.getDeviceId());
         orders.setDeviceNo(vo.getDeviceNo());
         orders.setUserId(user.getUserId());
@@ -81,8 +81,8 @@ public class OrdersServiceImpl implements OrdersService {
             if (Ognl.isNotEmpty(vo.getUserName())) {
                 predicates.add(criteriaBuilder.equal(root.get("userName"), vo.getUserName()));
             }
-            if (Ognl.isNotEmpty(vo.getNo())) {
-                predicates.add(criteriaBuilder.equal(root.get("no"), vo.getNo()));
+            if (Ognl.isNotEmpty(vo.getOrderNo())) {
+                predicates.add(criteriaBuilder.equal(root.get("orderNo"), vo.getOrderNo()));
             }
             if (Ognl.isNotEmpty(vo.getDeviceNo())) {
                 predicates.add(criteriaBuilder.equal(root.get("deviceNo"), vo.getDeviceNo()));
@@ -99,7 +99,7 @@ public class OrdersServiceImpl implements OrdersService {
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
-        Pageable pageable = PageRequest.of(page, limit, Sort.Direction.DESC, "createTime");
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.Direction.DESC, "createTime");
         Page<Orders> all = repository.findAll(specification, pageable);
         List<OrdersDto> ordersDtoList = new ArrayList<>();
         for (Orders orders : all.getContent()) {
